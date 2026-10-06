@@ -1,0 +1,35 @@
+{
+  "version": "v1",
+  "blocklist": [],
+  "data": [
+    {
+      "schema_version": "1.0.0",
+      "id": "h_style_rbd_nodes",
+      "name": "H-Style RBD Nodes",
+      "tagline": "Fracture, bake and export rigid body destruction for game VFX",
+      "version": "1.0.0",
+      "type": "add-on",
+      "maintainer": "Excifroge",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "5.2.0",
+      "website": "https://github.com/excifroge/H-Style-RBD-Nodes",
+      "copyright": [
+        "2026 Excifroge"
+      ],
+      "permissions": {
+        "files": "Export FBX, Alembic and VAT files to a folder you choose"
+      },
+      "tags": [
+        "Physics",
+        "Geometry Nodes",
+        "Game Engine",
+        "Animation"
+      ],
+      "archive_url": "./h_style_rbd_nodes.zip",
+      "archive_size": 100038,
+      "archive_hash": "sha256:d522196043cb8856bdd6fc8c16f39a611b2650aa7ffaf7fa133e92be3ab7f659"
+    }
+  ]
+}

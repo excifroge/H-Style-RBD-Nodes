@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.blend1
+*.blend2
+Dist/
+Tests/Out/
+Tools/UserResources/
+Examples/*.blend1
