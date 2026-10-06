@@ -145,7 +145,7 @@ def source_hash():
     """Hash of the extension sources, written into every result so a result can be tied to the code it tested."""
     import hashlib
     h = hashlib.sha1()
-    for folder, kinds in (("Extension", (".py", ".hlsl", ".shader", ".cs", ".toml")), ("Tests", (".py", ".sh"))):
+    for folder, kinds in (("Extension", (".py", ".toml")), ("Unity", (".hlsl", ".shader", ".cs")), ("Tests", (".py", ".sh"))):
         base = os.path.join(ROOT, folder)
         for name in sorted(os.listdir(base)):
             if name.endswith(kinds):

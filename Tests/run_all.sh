@@ -27,7 +27,7 @@ if [ "$1" = "--installed" ]; then
   [ "${PIPESTATUS[0]}" -eq 0 ] || { echo "FAIL  extension install"; fail=1; }
   # the installed copy must be byte-identical to the source that the other tests ran against
   inst="$BLENDER_USER_RESOURCES/extensions/user_default/h_style_rbd_nodes"
-  for f in Extension/*.py Extension/*.hlsl Extension/*.shader Extension/*.cs Extension/*.toml; do
+  for f in Extension/*.py Extension/*.toml; do
     cmp -s "$f" "$inst/$(basename "$f")" || { echo "FAIL  installed $(basename "$f") differs from source"; fail=1; }
   done
   run "test_addon (installed zip)" --python-exit-code 1 --python Tests/test_addon.py -- "$OUT" installed

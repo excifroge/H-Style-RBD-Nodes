@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: CC0-1.0  (public domain: copy it into any project, including commercial games)
 // H-Style RBD Nodes: one-click set-up of a VAT export in Unity (URP).
 //
-// Put the exported files (with their HStyleRbdUnity folder) under Assets. Select the exported .json, then
+// Put the four files of this folder anywhere under Assets, and the exported files in a folder under Assets.
+// Select the exported .json, then
 //   Assets > H-Style RBD Nodes > Set Up VAT From Json
 // Keep ONE copy of this script per project: a second copy is a duplicate class and stops compilation.
 // It fixes the import settings of the two data textures, creates <name>.mat with the right numbers and

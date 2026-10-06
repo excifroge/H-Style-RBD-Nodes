@@ -12,7 +12,7 @@
 
 * **H-Style のノード**：1 つの機能を 1 つのノードが担当し、属性を使ってノード間でデータを渡します。途中に独自のノードを挿入できます
 * **タイムラインへのベイク**：Blender 内蔵の Bullet でシミュレーションし、結果をノードに保存します。その後はタイムラインをスクラブしても再計算されません
-* **ゲームエンジン向けのエクスポート**：ボーンアニメーション付き FBX、リジッドボディ用 VAT、Alembic に対応し、Unity (URP) 用のシェーダーと再生コンポーネントを同梱します
+* **ゲームエンジン向けのエクスポート**：ボーンアニメーション付き FBX、リジッドボディ用 VAT、Alembic に対応し、Unity (URP) 用のシェーダーと再生コンポーネントを別途提供します
 
 Concrete / Glass / Wood の 3 種類の破砕パターン、既存パーツを破片として使う機能、接触関係に基づくコンストレイントの生成、クラスタリング、初速度、遅延アクティベーション、Blender のフォースフィールド、同じリジッドボディワールドでの複数オブジェクトのシミュレーションに対応しています。  
 本拡張機能は Python コードのみで構成され、Blender 本体を変更せず、バイナリも含みません。ノードグループは初回使用時に生成されます。
@@ -73,7 +73,7 @@ Concrete / Glass / Wood の 3 種類の破砕パターン、既存パーツを�
 
 * Blender 5.2 LTS 以降
 
-VAT エクスポートに同梱するシェーダーと再生コンポーネントは、以下の環境で動作を確認しています。
+VAT エクスポートと組み合わせて使う Unity のシェーダーと再生コンポーネントは、以下の環境で動作を確認しています。
 
 * Unity 6 (6000.0 LTS)
 * Universal Render Pipeline 17
@@ -853,7 +853,7 @@ RBD ノードは、以下の属性を使ってデータを渡します。途中�
 </thead>
 <tbody>
 <tr><td><b>Export FBX (Bones)</b></td><td>ボーン FBX のエクスポート。破片ごとに 1 本のボーンを持つスキニングされたメッシュと、ベイク済みアニメーション</td><td>Unity や Unreal で通常のボーンアニメーションとして使用</td></tr>
-<tr><td><b>Export VAT</b></td><td>VAT のエクスポート。メッシュ <code>.fbx</code>、位置と回転のテクスチャ <code>.exr</code>、<code>.json</code>、Unity 用のシェーダーとスクリプト</td><td>多数のインスタンス、GPU での再生</td></tr>
+<tr><td><b>Export VAT</b></td><td>VAT のエクスポート。メッシュ <code>.fbx</code>、位置と回転のテクスチャ <code>.exr</code>、<code>.json</code></td><td>多数のインスタンス、GPU での再生</td></tr>
 <tr><td><b>Export Alembic</b></td><td>Alembic のエクスポート。フレームごとのアニメーションメッシュ <code>.abc</code></td><td>ほかの DCC、オフラインレンダリング</td></tr>
 </tbody>
 </table>
@@ -900,10 +900,12 @@ FBX と VAT のエクスポート設定は以下のとおりです。
 デフォルトの Keyframe Reduction では、高速で回転する破片に 1～2 センチメートルのずれが生じることがあります。
 
 **VAT**  
-エクスポートしたすべてのファイル（`HStyleRbdUnity` フォルダを含む）を、`Assets` 内の同じフォルダに配置します。エクスポートした `.json` を選択し、メニュー **Assets > H-Style RBD Nodes > Set Up VAT From Json** を実行してください。  
+まず、下表の Unity 用ファイル 4 つをプロジェクトに追加します。`Assets` 内であれば、配置場所は自由です。  
+次に、エクスポートしたファイルを `Assets` 内の 1 つのフォルダに配置し、エクスポートした `.json` を選択して、メニュー **Assets > H-Style RBD Nodes > Set Up VAT From Json** を実行してください。  
 テクスチャのインポート設定、マテリアル、プレハブが自動的に作成されます。プレハブはそのままシーンに配置できます。
 
-以下のファイルが、エクスポート時に `HStyleRbdUnity` フォルダに同梱されます。1 つの Unity プロジェクトには 1 セットだけ配置してください。
+Unity 用ファイルは拡張機能に含まれないため、別途ダウンロードしてください。本リポジトリの [`Unity`](Unity) フォルダ、または [Releases](https://github.com/excifroge/H-Style-RBD-Nodes/releases) ページの `h_style_rbd_unity-x.y.z.zip` から入手できます。  
+1 つの Unity プロジェクトには 1 セットだけ配置してください。
 
 <table width="100%">
 <thead>
@@ -1024,4 +1026,4 @@ Blender は Blender Foundation の商標です。Unity は Unity Technologies �
 ## ライセンス
 本拡張機能は GPL-3.0-or-later ライセンスで公開されています。
 
-VAT エクスポートに同梱する `HStyleRbdVAT.hlsl`、`HStyleRbdVAT_URP.shader`、`HStyleRbdVatSetup.cs`、`HStyleRbdVatPlayer.cs` は CC0-1.0 で公開しており、任意のプロジェクトにそのままコピーして使用できます。
+[`Unity`](Unity) フォルダ内の `HStyleRbdVAT.hlsl`、`HStyleRbdVAT_URP.shader`、`HStyleRbdVatSetup.cs`、`HStyleRbdVatPlayer.cs` は CC0-1.0 で公開しており、任意のプロジェクトにそのままコピーして使用できます。

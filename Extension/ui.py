@@ -391,7 +391,7 @@ class HRBD_OT_export_fbx(_ExportBase, bpy.types.Operator, ExportHelper):
 class HRBD_OT_export_vat(_ExportBase, bpy.types.Operator, ExportHelper):
     bl_idname = "hrbd.export_vat"
     bl_label = "Export VAT"
-    bl_description = "Rigid-body vertex animation textures: mesh .fbx, two .exr textures, .json and a shader include"
+    bl_description = "Rigid-body vertex animation textures: mesh .fbx, two .exr textures and a .json. The shader and scripts for Unity are a separate download"
     filename_ext = ".json"
     filter_glob: StringProperty(default="*.json", options={"HIDDEN"})
     basis: EnumProperty(name="Target", default="UNITY", items=(

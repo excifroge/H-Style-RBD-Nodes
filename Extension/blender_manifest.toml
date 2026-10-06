@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "h_style_rbd_nodes"
-version = "1.0.0"
+version = "1.0.1"
 name = "H-Style RBD Nodes"
 tagline = "Fracture, bake and export rigid body destruction for game VFX"
 maintainer = "Excifroge"

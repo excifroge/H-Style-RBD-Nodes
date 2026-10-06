@@ -108,9 +108,59 @@ def _socket_key(node, sock, rebuilt):
     return (node.name, "name" if node in rebuilt else "id", sock.name if node in rebuilt else sock.identifier)
 
 
+def _animation_curves(id_block):
+    """[(container, F-curve)] for the keyframes and the drivers of `id_block`. The container is what the curve
+    can be removed from."""
+    ad = id_block.animation_data
+    if ad is None:
+        return []
+    found = [(ad.drivers, fc) for fc in ad.drivers]
+    action, slot = ad.action, getattr(ad, "action_slot", None)
+    if action is not None and slot is not None:
+        for layer in action.layers:
+            for strip in layer.strips:
+                bag = strip.channelbag(slot) if hasattr(strip, "channelbag") else None
+                if bag is not None:
+                    found += [(bag.fcurves, fc) for fc in bag.fcurves]
+    return found
+
+
+def _park_animation(user, rebuilt):
+    """Keyframes and drivers on the inputs of the nodes that are about to get new sockets. Blender deletes
+    the F-curves of a socket that is removed (measured: a keyframed input was a constant after the rebuild),
+    and it finds them by their path. So each one gets a path that belongs to no socket for the time of the
+    rebuild, and we remember the NAME of the input it was on: its number can change when an input is added."""
+    parked = []
+    for container, fc in _animation_curves(user):
+        for node in rebuilt:
+            prefix = f'nodes["{bpy.utils.escape_identifier(node.name)}"].inputs['
+            if not fc.data_path.startswith(prefix):
+                continue
+            number, _, rest = fc.data_path[len(prefix):].partition("]")
+            if number.isdigit() and int(number) < len(node.inputs):
+                parked.append((container, fc, node.name, node.inputs[int(number)].name, rest))
+                fc.data_path = f'["hrbd parked {len(parked)}"]'
+            break
+    return parked
+
+
+def _unpark_animation(user, parked):
+    for container, fc, node_name, input_name, rest in parked:
+        node = user.nodes.get(node_name)
+        number = next((i for i, s in enumerate(node.inputs) if s.name == input_name), None) if node is not None else None
+        if number is None:
+            container.remove(fc)                  # the input is gone in the new version
+            continue
+        fc.data_path = f'nodes["{bpy.utils.escape_identifier(node_name)}"].inputs[{number}]{rest}'
+        fc.is_valid = True                        # it was marked as broken while it pointed nowhere
+        if fc.driver is not None:
+            fc.driver.is_valid = True
+
+
 def _snapshot_nodes(tree):
-    """Every node that uses `tree` in another node tree: the values typed into it and the wires going in and
-    out of it. Rebuilding the group makes its sockets anew, which would drop both."""
+    """Every node that uses `tree` in another node tree: the values typed into it, the wires going in and
+    out of it, and the animation of its inputs. Rebuilding the group makes its sockets anew, which would
+    drop all three."""
     saved = []
     for user in bpy.data.node_groups:
         if user == tree or user.library is not None:
@@ -128,7 +178,7 @@ def _snapshot_nodes(tree):
             values[node.name] = mine
         links = {(_socket_key(l.from_node, l.from_socket, rebuilt), _socket_key(l.to_node, l.to_socket, rebuilt))
                  for l in user.links if l.from_node in rebuilt or l.to_node in rebuilt}
-        saved.append((user, values, sorted(links)))
+        saved.append((user, values, sorted(links), _park_animation(user, rebuilt)))
     return saved
 
 
@@ -139,7 +189,7 @@ def _find_again(node, sockets, how, key):
 
 
 def _restore_nodes(saved):
-    for user, values, links in saved:
+    for user, values, links, parked in saved:
         for node_name, mine in values.items():
             node = user.nodes.get(node_name)
             if node is None:
@@ -159,6 +209,7 @@ def _restore_nodes(saved):
             src, dst = _find_again(a, a.outputs, from_how, from_key), _find_again(b, b.inputs, to_how, to_key)
             if src is not None and dst is not None:
                 user.links.new(src, dst)
+        _unpark_animation(user, parked)
         user.update_tag()
 
 

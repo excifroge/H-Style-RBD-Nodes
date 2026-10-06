@@ -7,7 +7,7 @@
       "id": "h_style_rbd_nodes",
       "name": "H-Style RBD Nodes",
       "tagline": "Fracture, bake and export rigid body destruction for game VFX",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "type": "add-on",
       "maintainer": "Excifroge",
       "license": [
@@ -28,8 +28,8 @@
         "Animation"
       ],
       "archive_url": "./h_style_rbd_nodes.zip",
-      "archive_size": 100038,
-      "archive_hash": "sha256:d522196043cb8856bdd6fc8c16f39a611b2650aa7ffaf7fa133e92be3ab7f659"
+      "archive_size": 90725,
+      "archive_hash": "sha256:46499d37255e022a74c5c7d422daee2118cd7995a7d3093474c2de24a38ebab7"
     }
   ]
 }

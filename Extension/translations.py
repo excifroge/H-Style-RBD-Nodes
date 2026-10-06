@@ -56,7 +56,7 @@ ZH = {
     'Solver steps per frame. Raise for fast or thin pieces': '每帧的解算步数。碎块飞得快或很薄时调高',
     'Baked motion as an animated mesh (.abc)': '把烘焙结果导出为动画网格 (.abc)',
     'One bone per piece, skinned mesh, baked animation (.fbx) for game engines': '每块一根骨骼的蒙皮网格和烘焙动画 (.fbx)，用于游戏引擎',
-    'Rigid-body vertex animation textures: mesh .fbx, two .exr textures, .json and a shader include': '刚体顶点动画贴图：网格 .fbx、两张 .exr、.json 和一个着色器片段',
+    'Rigid-body vertex animation textures: mesh .fbx, two .exr textures and a .json. The shader and scripts for Unity are a separate download': '刚体顶点动画贴图：网格 .fbx、两张 .exr 和一个 .json。Unity 用的着色器和脚本需另行下载',
     'Leave the generated armature and skinned mesh in the scene': '导出后把生成的骨架和蒙皮网格留在场景里',
     'New RBD network:': '新建 RBD 网络：',
     'Fracture This Object': '破碎这个物体',

@@ -24,7 +24,9 @@ cat > "$P/Packages/manifest.json" <<'JSON'
   }
 }
 JSON
-cp -r "$SRC/HStyleRbdUnity" "$SRC"/unity_wall* "$SRC"/unity_vat* "$SRC/unity_bones.fbx" "$P/Assets/RbdExport/"
+cp "$SRC"/unity_wall* "$SRC"/unity_vat* "$SRC/unity_bones.fbx" "$P/Assets/RbdExport/"
+# the shader and scripts are a separate download for users; here they come straight from the repository
+mkdir -p "$P/Assets/HStyleRbdUnity" && cp Unity/*.cs Unity/*.hlsl Unity/*.shader "$P/Assets/HStyleRbdUnity/"
 cp "$SRC/events_truth.txt" "$P/"
 cp Tests/Unity/Fresh/HStyleRbdFreshCheck.cs "$P/Assets/Editor/"
 cp Tests/Unity/Fresh/HStyleRbdPlayProbe.cs "$P/Assets/"

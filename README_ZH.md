@@ -12,7 +12,7 @@
 
 * **H-Style 的节点**：一个功能一个节点，节点之间用属性传递数据，可以在中间插入自己的节点
 * **烘焙到时间线**：解算使用 Blender 自带的 Bullet，结果存在节点上，之后拖动时间线不再重新解算
-* **面向游戏引擎**：导出骨骼 FBX、刚体 VAT、Alembic，并附带 Unity (URP) 用的着色器和播放组件
+* **面向游戏引擎**：导出骨骼 FBX、刚体 VAT、Alembic，另提供 Unity (URP) 用的着色器和播放组件
 
 主要功能包括 Concrete / Glass / Wood 三种破碎方式、把现成零件当作碎块、按接触关系建立约束、分簇、初速度、延迟激活、Blender 力场，以及多个物体在同一个世界里解算。  
 本扩展只包含 Python 代码，不修改 Blender，不带二进制文件；节点组在第一次使用时生成。
@@ -73,7 +73,7 @@
 
 * Blender 5.2 LTS 及以上
 
-随 VAT 导出附带的着色器和播放组件在以下环境中核对过。
+配合 VAT 导出使用的 Unity 着色器和播放组件在以下环境中核对过。
 
 * Unity 6 (6000.0 LTS)
 * Universal Render Pipeline 17
@@ -853,7 +853,7 @@ RBD 节点之间通过以下属性传递数据。在节点之间插入自己的�
 </thead>
 <tbody>
 <tr><td><b>Export FBX (Bones)</b></td><td>导出 FBX（骨骼）。每块碎块一根骨骼的蒙皮网格和烘焙动画</td><td>在 Unity 或 Unreal 中作为普通的骨骼动画使用</td></tr>
-<tr><td><b>Export VAT</b></td><td>导出 VAT。网格 <code>.fbx</code>、位置贴图和旋转贴图 <code>.exr</code>、<code>.json</code>，以及 Unity 用的着色器和脚本</td><td>大量实例、在 GPU 上播放</td></tr>
+<tr><td><b>Export VAT</b></td><td>导出 VAT。网格 <code>.fbx</code>、位置贴图和旋转贴图 <code>.exr</code> 和 <code>.json</code></td><td>大量实例、在 GPU 上播放</td></tr>
 <tr><td><b>Export Alembic</b></td><td>导出 Alembic。逐帧的动画网格 <code>.abc</code></td><td>其他 DCC、离线渲染</td></tr>
 </tbody>
 </table>
@@ -900,10 +900,12 @@ FBX 和 VAT 的导出选项如下。
 默认的 Keyframe Reduction 会使快速翻滚的碎块产生 1 到 2 厘米的偏差。
 
 **VAT**  
-把导出的所有文件（包括 `HStyleRbdUnity` 文件夹）放入 `Assets` 下的同一个文件夹，选中导出的 `.json`，执行菜单 **Assets > H-Style RBD Nodes > Set Up VAT From Json**。  
+先把下表中 Unity 用的四个文件放入工程，位置不限，只要在 `Assets` 下。  
+再把导出的文件放入 `Assets` 下的一个文件夹，选中导出的 `.json`，执行菜单 **Assets > H-Style RBD Nodes > Set Up VAT From Json**。  
 贴图的导入设置、材质和预制体会自动生成，预制体可以直接放入场景。
 
-随导出附带的文件如下，位于 `HStyleRbdUnity` 文件夹中。一个 Unity 工程中只需要保留一份。
+Unity 用的文件不包含在扩展中，需要另行下载：本仓库的 [`Unity`](Unity) 文件夹，或 [Releases](https://github.com/excifroge/H-Style-RBD-Nodes/releases) 页面上的 `h_style_rbd_unity-x.y.z.zip`。  
+一个 Unity 工程中只需要保留一份。
 
 <table width="100%">
 <thead>
@@ -1024,4 +1026,4 @@ Blender 是 Blender Foundation 的商标。Unity 是 Unity Technologies 的商�
 ## 许可证
 本扩展以 GPL-3.0-or-later 许可证发布。
 
-随 VAT 导出附带的 `HStyleRbdVAT.hlsl`、`HStyleRbdVAT_URP.shader`、`HStyleRbdVatSetup.cs`、`HStyleRbdVatPlayer.cs` 以 CC0-1.0 发布，可以直接复制到任何工程中使用。
+[`Unity`](Unity) 文件夹中的 `HStyleRbdVAT.hlsl`、`HStyleRbdVAT_URP.shader`、`HStyleRbdVatSetup.cs`、`HStyleRbdVatPlayer.cs` 以 CC0-1.0 发布，可以直接复制到任何工程中使用。

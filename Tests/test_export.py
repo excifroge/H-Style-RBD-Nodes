@@ -294,22 +294,18 @@ try:
         fh.seek(0)
         n_lines = sum(1 for _ in fh)
     c.check("json_stays_readable", n_lines < 80 and longest > 200, [n_lines, longest])
-    support = os.path.join(OUT, meta["unity_support_folder"])
-    c.check("unity_files_in_their_own_folder", sorted(os.listdir(support)) == ["HStyleRbdVAT.hlsl", "HStyleRbdVAT_URP.shader", "HStyleRbdVatPlayer.cs", "HStyleRbdVatSetup.cs"],
-            sorted(os.listdir(support)))
+    # the files for Unity are not part of the extension: an export is its four files and says where the others are
+    c.check("export_is_four_files", sorted(os.path.basename(p) for p in info["files"]) == sorted(
+        "export_crate" + s for s in ("_pos.exr", "_rot.exr", "_mesh.fbx", ".json")), [os.path.basename(p) for p in info["files"]])
+    c.check("json_says_where_the_unity_files_are", meta["unity_files"].endswith(export.UNITY_FILES_URL)
+            and export.UNITY_FILES_URL.startswith("https://") and "unity_support_folder" not in meta, meta.get("unity_files"))
+    unity = os.path.join(T.ROOT, "Unity")
+    schema_in_unity = [name for name in sorted(os.listdir(unity)) if name.endswith((".cs", ".hlsl"))
+                       and export.VAT_SCHEMA in open(os.path.join(unity, name), encoding="utf-8").read()]
+    c.check("unity_files_name_the_same_schema", schema_in_unity == ["HStyleRbdVAT.hlsl", "HStyleRbdVatPlayer.cs", "HStyleRbdVatSetup.cs"],
+            schema_in_unity)
     bpy.data.batch_remove([o for o in bpy.data.objects if o not in before])
 
-    # exporting into the extension's own folder must not wipe the shader it ships
-    import shutil
-    ext_dir = os.path.dirname(os.path.abspath(export.__file__))
-    shader = os.path.join(ext_dir, "HStyleRbdVAT.hlsl")
-    size = os.path.getsize(shader)
-    made = export.export_vat(bpy.context, ob, ext_dir, "zz_selftest", "UNITY")["files"]
-    c.check("shader_not_clobbered", os.path.getsize(shader) == size and shader not in made, os.path.getsize(shader))
-    for p in made:
-        if os.path.basename(p).startswith("zz_selftest"):
-            os.remove(p)
-    shutil.rmtree(os.path.join(ext_dir, export.SUPPORT_FOLDER), ignore_errors=True)
 except Exception:
     c.error()
 c.done()

@@ -886,6 +886,76 @@ if wanted("upgrade"):
         c.check("rebake_after_upgrade", again.pieces == res.pieces and again.anchored == res.anchored and again.frames == 30,
                 [again.pieces, res.pieces, again.anchored, res.anchored])
         c.check("refresh_does_nothing_when_up_to_date", nodes_rbd.refresh() == [])
+
+        # Animation on the inputs of the nodes. Blender deletes the F-curves of sockets that are removed, and a
+        # rebuild removes them all: the curves have to come back, on the input of the same NAME.
+        speed = n[S].inputs["Time Scale"]
+        speed.default_value = 1.0
+        speed.keyframe_insert("default_value", frame=1)
+        speed.default_value = 0.25
+        speed.keyframe_insert("default_value", frame=30)
+        n[S].inputs["Frame Offset"].driver_add("default_value").driver.expression = "frame * 0.5"
+
+        def curves():
+            """{input: what animates it} for the F-curves and drivers of the network."""
+            out = {}
+            for _, fc in nodekit._animation_curves(tree):
+                try:
+                    where = tree.path_resolve(fc.data_path.rsplit(".", 1)[0]).name
+                except ValueError:
+                    where = fc.data_path
+                out[where] = fc.driver.expression if fc.driver is not None else [round(fc.evaluate(1), 4), round(fc.evaluate(30), 4)]
+            return out
+
+        def picture(frame=12):
+            bpy.context.scene.frame_set(frame)
+            return core.EvalMesh(wall).co.copy()
+
+        def outdated():
+            for g in groups:
+                g[nodekit.VERSION_PROP] = -1
+        def driven():
+            """What the two inputs are when Blender evaluates the network on frames 1 and 30."""
+            out = []
+            for frame in (1, 30):
+                bpy.context.scene.frame_set(frame)
+                node = tree.evaluated_get(bpy.context.evaluated_depsgraph_get()).nodes[n[S].name]
+                out.append([round(node.inputs["Time Scale"].default_value, 4), round(node.inputs["Frame Offset"].default_value, 4)])
+            return out
+        want = {"Time Scale": [1.0, 0.25], "Frame Offset": "frame * 0.5"}
+        driven_before = driven()
+        animated = picture()
+        c.check("animation_is_set_up", curves() == want and driven_before == [[1.0, 0.5], [0.25, 15.0]], [curves(), driven_before])
+        outdated()
+        nodes_rbd.refresh()
+        c.check("keyframes_and_drivers_survive", curves() == want, curves())
+        c.check("animated_picture_survives", float(np.abs(picture() - animated).max()) < 1e-6)
+        c.check("the_curves_drive_the_node", driven() == driven_before, driven())
+
+        # a newer version that adds an input in front of the animated ones: every later input moves down by one
+        make_input = nodekit.Builder.input
+
+        def with_one_more(self, name, *args, **kwargs):
+            if name == "Time Scale":
+                make_input(self, "Brand New", "float", 0.0)
+            return make_input(self, name, *args, **kwargs)
+        at = list(n[S].inputs).index(n[S].inputs["Time Scale"])
+        nodekit.Builder.input = with_one_more
+        try:
+            outdated()
+            nodes_rbd.refresh()
+        finally:
+            nodekit.Builder.input = make_input
+        moved = list(n[S].inputs).index(n[S].inputs["Time Scale"])
+        c.set(time_scale_input_number=[at, moved])
+        c.check("curves_follow_the_name_of_the_input", moved == at + 1 and curves() == want and driven() == driven_before,
+                [at, moved, curves(), driven()])
+        c.check("animated_picture_survives_a_new_input", float(np.abs(picture() - animated).max()) < 1e-6)
+        # ... and the version after that drops the input again, which someone had animated in the meantime
+        n[S].inputs["Brand New"].keyframe_insert("default_value", frame=1)
+        outdated()
+        nodes_rbd.refresh()
+        c.check("a_removed_input_takes_its_curve_along", "Brand New" not in n[S].inputs and curves() == want, curves())
     except Exception:
         c.error()
     c.done()

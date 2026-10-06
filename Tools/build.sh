@@ -7,7 +7,7 @@
 cd "$(dirname "$0")/.." || exit 1
 B="${BLENDER:-blender}"
 rm -rf Dist && mkdir -p Dist/Stage
-cp Extension/*.py Extension/*.toml Extension/*.txt Extension/*.cs Extension/*.hlsl Extension/*.shader Dist/Stage/
+cp Extension/*.py Extension/*.toml Extension/*.txt Dist/Stage/
 touch -d "2000-01-01 12:00:00" Dist/Stage/*
 "$B" --factory-startup --command extension validate Dist/Stage 2>&1 | grep -iE "error|success"
 [ "${PIPESTATUS[0]}" -eq 0 ] || { echo "FAIL  extension validate"; exit 1; }

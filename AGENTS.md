@@ -12,7 +12,7 @@ A Blender extension (Blender 5.2 LTS or newer, Python only, no binaries, Blender
 that provides rigid body destruction for game VFX as a family of Geometry Nodes node groups:
 
     model -> RBD Material Fracture -> (RBD Configure, RBD Cluster, ...) -> RBD Bullet Solver -> baked motion
-          -> export: bone FBX / rigid-body VAT (textures + Unity shader and player) / Alembic
+          -> export: bone FBX / rigid-body VAT (textures; a Unity shader and player are in Unity/) / Alembic
 
 "H-Style" is this project's name for the conventions the node family follows:
 
@@ -34,7 +34,7 @@ writes the result back into the node, which then plays it.
 |---|---|
 | `Extension/` | The add-on. This folder is what gets zipped and installed |
 | `Extension/blender_manifest.toml` | Extension id `h_style_rbd_nodes`, version, licence |
-| `Extension/*.cs`, `*.hlsl`, `*.shader` | Unity files copied next to every VAT export (CC0-1.0) |
+| `Unity/` | The shader and scripts that read a VAT export in Unity (CC0-1.0). Not part of the extension and not copied by an export: users download them from the repository or from the release page |
 | `Examples/make_examples.py` | Builds the seven example `.blend` files through the add-on's own operators |
 | `Tests/` | Headless test suites and the Unity checks (section 8) |
 | `Tools/` | Screenshot, GIF and checking tools for the documentation (section 9) |
@@ -177,7 +177,8 @@ p_now = to_now @ p                                     # where that centre is in
 interpolated between two cache frames (`nodes_playback`).
 
 **The VAT export** writes schema `hrbd_vat_1` (`export.VAT_SCHEMA`); the layout is described in the README
-and in the header of `Extension/HStyleRbdVAT.hlsl`. The Unity files check the schema string.
+and in the header of `Unity/HStyleRbdVAT.hlsl`. The Unity files check the schema string. The `.json` of an
+export names the address of the Unity files (`export.UNITY_FILES_URL`).
 
 **Operators**: `hrbd.setup`, `hrbd.add_node`, `hrbd.check_mesh`, `hrbd.cursor_to_input`, `hrbd.bake`,
 `hrbd.free_bake`, `hrbd.export_fbx`, `hrbd.export_vat`, `hrbd.export_alembic`.
@@ -193,7 +194,8 @@ it the panel's checkbox; `b.menu(name, items, default)` adds a drop-down and ret
 shorthands; `b.output(...)`; `b.finish()` lays the nodes out and stamps the version.
 `ensure_group(kind, version, build)` returns the existing group or (re)builds it. A rebuild happens in
 place, so users of the group keep pointing at it; the values and wires of every modifier and node that uses
-the group are saved before and restored after, **by socket name**.
+the group are saved before and restored after, **by socket name**, and so are the keyframes and drivers on
+the inputs of those nodes (`_park_animation`, `_unpark_animation`).
 
 **`nodes_fracture.py`**: the cutting kernel. Also still usable directly as a modifier (the legacy path,
 see section 10).
@@ -261,8 +263,11 @@ Node groups
 - **Changing a group's interface** from Python removes and recreates sockets, with new identifiers. Every
   node using the group would lose its values and wires; `nodekit` restores them by name. Consequences:
   bump the group's version whenever its build function changes, and treat a renamed input as a removed one.
-  **Keyframes and drivers are not restored**: Blender deletes them together with the old sockets (measured:
-  a keyframed `Time Scale` is a constant after the rebuild). Nothing in the add-on brings them back yet.
+  Blender also **deletes the keyframes and drivers** of the removed sockets, finding them by their path
+  (measured: a keyframed `Time Scale` was a constant after the rebuild). `nodekit` gives each of those
+  curves a path that belongs to no socket for the time of the rebuild, then points it at the input of the
+  same name. The path holds the input's number, which changes when an input is added before it.
+  Not covered: animation of the inputs of a modifier that uses a group directly (the legacy path).
 - A Switch is lazy, but if the same geometry also feeds a **nested group node**, it is evaluated every time.
   That is why playback reads the frozen pieces object instead of the node's own input.
 - In about one freshly built group in four, a Switch branch that is not selected is **evaluated anyway**
@@ -328,7 +333,7 @@ A single case can be named after the output folder, as in the last line above.
 | Suite | Covers |
 |---|---|
 | `test_fracture.py` | The cutting kernel: volumes, closed pieces, attributes, UVs, normals, the three patterns |
-| `test_nodes.py` | The RBD nodes end to end. Cases: `material_fracture` (constraint network against the Python reference), `solver`, `pieces` (Assemble, rules, proxy), `forces` (hand-over timing, initial velocity and spin, force fields), `upgrade` (old groups keep values and wires) |
+| `test_nodes.py` | The RBD nodes end to end. Cases: `material_fracture` (constraint network against the Python reference), `solver`, `pieces` (Assemble, rules, proxy), `forces` (hand-over timing, initial velocity and spin, force fields), `upgrade` (old groups keep values, wires and the animation of their inputs) |
 | `test_bake.py` | The solver through the legacy path: glue, clusters, anchors, activation, events, cache, undo on failure |
 | `test_export.py` | FBX, VAT, Alembic read back and compared with the bake; merging |
 | `test_stress.py` | Awkward models through the node workflow: open, non-manifold, scaled, parented, tiny, huge, far from the origin |
@@ -433,14 +438,15 @@ return topology from `graph.proxy`, build the temporary meshes with faces, and t
 3. `bash Tools/make_release.sh`, then commit `Repository/`. It holds the zip **without** the version in its
    name, so the link in the READMEs does not change from release to release, and the `index.json` that
    Blender reads (it carries the version, the size and the hash of the zip).
-4. Attach `Dist/h_style_rbd_nodes-<version>.zip` (the same bytes) to the release page.
+4. Attach `Dist/h_style_rbd_nodes-<version>.zip` (the same bytes) and `Dist/h_style_rbd_unity-<version>.zip`
+   (the `Unity/` folder, packed by the same script) to the release page.
 
 How the drag-and-drop link works: it is the address of the zip followed by
 `?repository=.%2Findex.json&blender_version_min=5.2.0`. Dropped on Blender, `./index.json` is resolved next to
 the zip, Blender offers to add that address as a repository, and installs the entry of the index whose
 `archive_url` is the dropped address. So the zip and `index.json` must be served as plain files from the
-same folder, at exactly the address written in the three READMEs. A fork has to put its own address there
-and in `website` in the manifest. If `blender_version_min` changes in the manifest, change it in the link.
+same folder, at exactly the address written in the three READMEs. A fork has to put its own address there,
+in `website` in the manifest and in `export.UNITY_FILES_URL`. If `blender_version_min` changes in the manifest, change it in the link.
 
 ## 12. Conventions
 
@@ -455,7 +461,10 @@ and in `website` in the manifest. If `blender_version_min` changes in the manife
 - After any change to `Extension/`: run `Tests/run_all.sh --installed`. After any change to interface text:
   run `Tools/ui_strings.py`.
 - Licence: the extension is GPL-3.0-or-later (required for Blender add-ons). The four Unity files in
-  `Extension/` are CC0-1.0 so they can be copied into any project; keep their SPDX headers.
+  `Unity/` are CC0-1.0 so they can be copied into any project; keep their SPDX headers.
+- `Extension/` holds Python only, plus the manifest and the licence text. That is a rule of the Blender
+  Extensions platform ("source code of the extension must be fully written in Python"), and the reason the
+  Unity files live outside it. Do not move other kinds of files back in.
 
 ## 13. Measured numbers
 
@@ -505,5 +514,3 @@ Unity 6000.0 (URP, linear colour, Direct3D 11), a 40-piece, 48-frame export, 300
 - Only the Wind and Force field types were measured; the others go through the same path untested.
 - Unity was checked on one version and one render pipeline (URP); Unreal was not checked.
 - No fracturing during the simulation, no chipping.
-- When an update of the add-on rebuilds a node group, the nodes that use it keep their values and wires but
-  lose keyframes and drivers on their inputs (section 7).

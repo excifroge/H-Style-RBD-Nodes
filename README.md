@@ -12,7 +12,7 @@ Connect a model to `RBD Material Fracture` to produce three streams: pieces, con
 
 * **H-Style nodes**: one task per node, with attributes passing data between nodes. You can insert your own nodes in the chain
 * **Bake to the timeline**: simulation uses Blender's built-in Bullet solver and stores the result on the node. Scrubbing the timeline afterward does not rerun the simulation
-* **Export to game engines**: export bone-animated FBX, rigid-body VAT, or Alembic, with a shader and playback component for Unity (URP)
+* **Export to game engines**: export bone-animated FBX, rigid-body VAT, or Alembic; a shader and playback component for Unity (URP) are provided separately
 
 Features include Concrete / Glass / Wood fracture patterns, using existing parts as pieces, building constraints from contacts, clustering, initial velocity, delayed activation, Blender force fields, and simulating multiple objects in the same rigid body world.  
 The extension contains only Python code. It does not modify Blender or include binaries; node groups are generated on first use.
@@ -73,7 +73,7 @@ The extension supports the following environment.
 
 * Blender 5.2 LTS or newer
 
-The shader and playback component included with VAT exports have been verified in the following environment.
+The Unity shader and playback component used with VAT exports have been verified in the following environment.
 
 * Unity 6 (6000.0 LTS)
 * Universal Render Pipeline 17
@@ -853,7 +853,7 @@ After baking, use the three export buttons at the bottom of the Sidebar.
 </thead>
 <tbody>
 <tr><td><b>Export FBX (Bones)</b></td><td>A skinned mesh with one bone per piece and baked animation</td><td>Use as standard skeletal animation in Unity or Unreal</td></tr>
-<tr><td><b>Export VAT</b></td><td>Mesh <code>.fbx</code>, position and rotation textures <code>.exr</code>, <code>.json</code>, and Unity shaders and scripts</td><td>Many instances; playback on the GPU</td></tr>
+<tr><td><b>Export VAT</b></td><td>Mesh <code>.fbx</code>, position and rotation textures <code>.exr</code>, and <code>.json</code></td><td>Many instances; playback on the GPU</td></tr>
 <tr><td><b>Export Alembic</b></td><td>Animated mesh sampled every frame <code>.abc</code></td><td>Other DCC applications; offline rendering</td></tr>
 </tbody>
 </table>
@@ -900,10 +900,12 @@ Alternatively, select the `.fbx` and run **Assets > H-Style RBD Nodes > Fix Bone
 The default Keyframe Reduction can introduce deviations of 1 to 2 centimeters in rapidly tumbling pieces.
 
 **VAT**  
-Place all exported files, including the `HStyleRbdUnity` folder, in the same folder under `Assets`. Select the exported `.json` and run **Assets > H-Style RBD Nodes > Set Up VAT From Json**.  
+First, place the four Unity files listed below anywhere under `Assets` in your project.  
+Then place the exported files in a folder under `Assets`, select the exported `.json`, and run **Assets > H-Style RBD Nodes > Set Up VAT From Json**.  
 Texture import settings, materials, and a prefab are generated automatically. Place the prefab directly in the scene.
 
-The following files are included in the export under `HStyleRbdUnity`. Keep only one copy in each Unity project.
+The Unity files are not included in the extension and must be downloaded separately: from this repository's [`Unity`](Unity) folder, or as `h_style_rbd_unity-x.y.z.zip` from the [Releases](https://github.com/excifroge/H-Style-RBD-Nodes/releases) page.  
+Keep only one copy in each Unity project.
 
 <table width="100%">
 <thead>
@@ -1024,4 +1026,4 @@ Blender is a trademark of the Blender Foundation. Unity is a trademark of Unity 
 ## License
 This extension is released under GPL-3.0-or-later.
 
-The files included with VAT exports, `HStyleRbdVAT.hlsl`, `HStyleRbdVAT_URP.shader`, `HStyleRbdVatSetup.cs`, and `HStyleRbdVatPlayer.cs`, are released under CC0-1.0 and may be copied directly into any project.
+The files in the [`Unity`](Unity) folder, `HStyleRbdVAT.hlsl`, `HStyleRbdVAT_URP.shader`, `HStyleRbdVatSetup.cs`, and `HStyleRbdVatPlayer.cs`, are released under CC0-1.0 and may be copied directly into any project.

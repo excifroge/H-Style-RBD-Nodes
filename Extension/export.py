@@ -15,8 +15,9 @@ from mathutils import Matrix, Quaternion, Vector
 from . import sim
 
 VAT_SCHEMA = "hrbd_vat_1"
-SIDECAR_FILES = ("HStyleRbdVAT.hlsl", "HStyleRbdVAT_URP.shader", "HStyleRbdVatSetup.cs", "HStyleRbdVatPlayer.cs")
-SUPPORT_FOLDER = "HStyleRbdUnity"   # where they go, next to the exported files
+# The shader and the scripts that read a VAT export in Unity are not part of the extension (an extension
+# holds Python only): they are in the Unity folder of the project's repository. A fork puts its own address here.
+UNITY_FILES_URL = "https://github.com/excifroge/H-Style-RBD-Nodes/tree/main/Unity"
 
 # Blender (right-handed, Z up) -> Unity (left-handed, Y up) for a mesh exported through FBX
 # with "Apply Transform": unity = (-x, z, -y).
@@ -467,15 +468,6 @@ def export_vat(context, ob, directory, name=None, basis="UNITY", merge=False, me
     scene = context.scene
     name = name or bpy.path.clean_name(ob.name)
     os.makedirs(directory, exist_ok=True)
-    # shader files that travel with every export. Read them before anything is opened for writing:
-    # the export folder can be this very folder.
-    here = os.path.dirname(os.path.abspath(__file__))
-    sidecars = {}
-    for fname in SIDECAR_FILES:
-        src = os.path.join(here, fname)
-        if os.path.exists(src):
-            with open(src, encoding="utf-8") as fh:
-                sidecars[fname] = fh.read()
     tex_pos, tex_rot, layout = vat_textures(pos, quat, pivots, basis)
     paths = {k: os.path.join(directory, name + suffix) for k, suffix in
              (("pos.exr", "_pos.exr"), ("rot.exr", "_rot.exr"), ("mesh.fbx", "_mesh.fbx"), ("vat.json", ".json"))}
@@ -526,7 +518,7 @@ def export_vat(context, ob, directory, name=None, basis="UNITY", merge=False, me
         "position_file": os.path.basename(paths["pos.exr"]),
         "rotation_file": os.path.basename(paths["rot.exr"]),
         "mesh_file": os.path.basename(paths["mesh.fbx"]),
-        "unity_support_folder": SUPPORT_FOLDER,
+        "unity_files": "shader, set-up menu and player component for Unity: " + UNITY_FILES_URL,
         "merged": "pieces that never come apart share one column" if merge else "one column per piece",
         "source_piece_count": source_count,
         "position_texture": {"file": os.path.basename(paths["pos.exr"]),
@@ -557,13 +549,5 @@ def export_vat(context, ob, directory, name=None, basis="UNITY", merge=False, me
     })
     with open(paths["vat.json"], "w", encoding="utf-8") as fh:
         fh.write(_dump_json(meta))
-    files = list(paths.values())
-    support = os.path.join(directory, SUPPORT_FOLDER)
-    os.makedirs(support, exist_ok=True)
-    for fname, text in sidecars.items():
-        dst = os.path.join(support, fname)
-        with open(dst, "w", encoding="utf-8") as fh:
-            fh.write(text)
-        files.append(dst)
-    return {"files": files, "json": paths["vat.json"], "events": int(len(events)), "pieces": source_count,
+    return {"files": list(paths.values()), "json": paths["vat.json"], "events": int(len(events)), "pieces": source_count,
             "hidden_faces": int(merged.hidden.sum()) if merge else 0, **layout}
