@@ -1,14 +1,14 @@
 schema_version = "1.0.0"
 
 id = "h_style_rbd_nodes"
-version = "1.0.1"
+version = "1.0.2"
 name = "H-Style RBD Nodes"
 tagline = "Fracture, bake and export rigid body destruction for game VFX"
 maintainer = "Excifroge"
 type = "add-on"
 website = "https://github.com/excifroge/H-Style-RBD-Nodes"
 
-tags = ["Physics", "Geometry Nodes", "Game Engine", "Animation"]
+tags = ["Physics", "Geometry Nodes", "Game Engine"]
 
 blender_version_min = "5.2.0"
 

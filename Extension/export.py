@@ -17,7 +17,8 @@ from . import sim
 VAT_SCHEMA = "hrbd_vat_1"
 # The shader and the scripts that read a VAT export in Unity are not part of the extension (an extension
 # holds Python only): they are in the Unity folder of the project's repository. A fork puts its own address here.
-UNITY_FILES_URL = "https://github.com/excifroge/H-Style-RBD-Nodes/tree/main/Unity"
+REPOSITORY_URL = "https://github.com/excifroge/H-Style-RBD-Nodes"
+UNITY_FILES_URL = REPOSITORY_URL + "/tree/main/Unity"
 
 # Blender (right-handed, Z up) -> Unity (left-handed, Y up) for a mesh exported through FBX
 # with "Apply Transform": unity = (-x, z, -y).

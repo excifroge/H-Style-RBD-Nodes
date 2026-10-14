@@ -9,6 +9,9 @@ text that would be shown in English.
 import bpy
 
 ZH = {
+    'Example scenes and the manual are on GitHub': '示例场景和使用手册在 GitHub 上',
+    'Example Scenes': '示例场景',
+    'User Manual': '使用手册',
     'Select a mesh object': '请选中一个网格物体',
     'Advanced': '高级',
     'Concrete': '混凝土',

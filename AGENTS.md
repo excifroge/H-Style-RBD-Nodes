@@ -239,7 +239,7 @@ corners are all shared with another piece of the same group is dropped as hidden
 
 **`ui.py`**: operators, the `Add > RBD` menu, and two panels that draw the inputs of the RBD nodes of the
 active object with `layout.template_node_inputs(node)`. `TEMPLATES` are the networks the set-up operator
-builds. `PANEL_TEXT` lists text drawn by hand, for the translation check. A `load_post` handler calls
+builds. `HRBD_AP_preferences` is what shows under the add-on in Preferences: two links, to the example files and to the manual (the examples are not part of the extension). `PANEL_TEXT` lists text drawn by hand, for the translation check. A `load_post` handler calls
 `nodes_rbd.refresh()`.
 
 **`translations.py`**: Simplified Chinese interface text (`ZH`). Node names are never translated.
@@ -446,7 +446,7 @@ How the drag-and-drop link works: it is the address of the zip followed by
 the zip, Blender offers to add that address as a repository, and installs the entry of the index whose
 `archive_url` is the dropped address. So the zip and `index.json` must be served as plain files from the
 same folder, at exactly the address written in the three READMEs. A fork has to put its own address there,
-in `website` in the manifest and in `export.UNITY_FILES_URL`. If `blender_version_min` changes in the manifest, change it in the link.
+in `website` in the manifest and in `export.REPOSITORY_URL` (the Unity link and the links in the add-on's preferences are made from it). If `blender_version_min` changes in the manifest, change it in the link.
 
 ## 12. Conventions
 

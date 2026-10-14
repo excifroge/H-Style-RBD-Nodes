@@ -21,6 +21,7 @@ PANEL_TEXT = (
     "with the RBD nodes wired up", "Mesh is not closed", "Weld, close holes or Solidify", "Check Again",
     "No RBD Bullet Solver node:", "add one to simulate (Add > RBD)", "Bake", "Re-Bake", "Bake {n} Objects Together",
     "{pieces} pieces, {frames} frames", "{name} from 3D Cursor",
+    "Example scenes and the manual are on GitHub", "Example Scenes", "User Manual",
 )
 
 
@@ -513,7 +514,21 @@ class HRBD_PT_node_editor(bpy.types.Panel):
         draw_network(self.layout, context, ob, with_parameters=False)
 
 
+class HRBD_AP_preferences(bpy.types.AddonPreferences):
+    """What shows under the add-on in Preferences: where the example files and the manual are. The example
+    .blend files are not part of the extension (only Python may be), so they are a download of their own."""
+    bl_idname = __package__
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Example scenes and the manual are on GitHub", icon="INFO")
+        row = layout.row()
+        row.operator("wm.url_open", text="Example Scenes", icon="FILE_BLEND").url = export.REPOSITORY_URL + "/tree/main/Examples"
+        row.operator("wm.url_open", text="User Manual", icon="HELP").url = export.REPOSITORY_URL + "#readme"
+
+
 CLASSES = (
+    HRBD_AP_preferences,
     HRBD_OT_setup, HRBD_OT_add_node, NODE_MT_hrbd_add, HRBD_OT_check_mesh, HRBD_OT_cursor_to_input,
     HRBD_OT_bake, HRBD_OT_free,
     HRBD_OT_export_alembic, HRBD_OT_export_fbx, HRBD_OT_export_vat,

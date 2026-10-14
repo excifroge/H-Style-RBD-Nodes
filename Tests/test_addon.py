@@ -73,6 +73,30 @@ try:
         mods = [m.__name__ for m in addon_utils.modules() if m.__name__.endswith(".h_style_rbd_nodes")]
         c.set(module=mods)
         c.check("extension_enabled", len(mods) == 1 and addon_utils.check(mods[0])[1], mods)
+        prefs = bpy.context.preferences.addons[mods[0]].preferences if mods else None
+
+        class Recorder:
+            """Stands in for a layout: keeps what the preferences would draw."""
+            def __init__(self):
+                self.drawn = []
+
+            def label(self, text="", **_):
+                self.drawn.append(("label", text))
+
+            def row(self):
+                return self
+
+            def operator(self, idname, text="", **_):
+                entry = type("Button", (), {})()
+                self.drawn.append(("button", text, idname, entry))
+                return entry
+        rec = Recorder()
+        if prefs is not None:
+            type(prefs).draw(type("Panel", (), {"layout": rec})(), bpy.context)
+        links = [(d[1], d[3].url) for d in rec.drawn if d[0] == "button"]
+        c.check("preferences_point_at_examples_and_manual", prefs is not None and len(links) == 2
+                and links[0][1].endswith("/tree/main/Examples") and links[1][1].endswith("#readme")
+                and all(url.startswith("https://github.com/") for _, url in links), links)
     else:
         import Extension
         Extension.register()
